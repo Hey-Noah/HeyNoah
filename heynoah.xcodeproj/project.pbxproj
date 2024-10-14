@@ -29,9 +29,22 @@
 		0F8674B82CBC26F200BAC0BF /* heynoahUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = heynoahUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0FEBA4762CBCBE4700068155 /* Exceptions for "heynoah" folder in "heynoah" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 0F86749D2CBC26F100BAC0BF /* heynoah */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0F8674A02CBC26F100BAC0BF /* heynoah */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0FEBA4762CBCBE4700068155 /* Exceptions for "heynoah" folder in "heynoah" target */,
+			);
 			path = heynoah;
 			sourceTree = "<group>";
 		};
@@ -321,6 +334,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
+				INFOPLIST_KEY_NSBluetoothWhileInUseUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need to use the microphone to transcribe speech.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "We need speech recognition for the transcription capabilities of the app.";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -378,6 +396,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
+				INFOPLIST_KEY_NSBluetoothWhileInUseUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need to use the microphone to transcribe speech.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "We need speech recognition for the transcription capabilities of the app.";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -397,8 +420,14 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"heynoah/Preview Content\"";
 				DEVELOPMENT_TEAM = 3B9PG6VC7Z;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = heynoah/Info.plist;
+				INFOPLIST_KEY_LSBackgroundOnly = NO;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
+				INFOPLIST_KEY_NSBluetoothWhileInUseUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "The microphone is necessary for transcription services.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Speech Recognition will be used for the transcription.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -428,8 +457,14 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"heynoah/Preview Content\"";
 				DEVELOPMENT_TEAM = 3B9PG6VC7Z;
+				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = heynoah/Info.plist;
+				INFOPLIST_KEY_LSBackgroundOnly = NO;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
+				INFOPLIST_KEY_NSBluetoothWhileInUseUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "The microphone is necessary for transcription services.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Speech Recognition will be used for the transcription.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
