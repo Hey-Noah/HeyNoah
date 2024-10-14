@@ -13,6 +13,7 @@ struct TranscriptionView: UIViewControllerRepresentable {
         let controller = TranscriptionViewController(speechService: speechService, notificationService: notificationService)
         controller.fontSize = fontSize
         controller.customName = customName
+        controller.transcriptionLabel.font = UIFont.systemFont(ofSize: fontSize)
         return controller
     }
 

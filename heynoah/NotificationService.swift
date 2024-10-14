@@ -1,4 +1,3 @@
-
 // NotificationService.swift
 import Foundation
 import UserNotifications
@@ -7,6 +6,8 @@ import Combine
 class NotificationService: ObservableObject {
     private let notificationCenter = UNUserNotificationCenter.current()
     private var hasRequestedAuthorization = false
+    private var lastNotificationTime: Date?
+    private let notificationCooldown: TimeInterval = 5.0 // Cooldown period to avoid duplicate notifications
 
     func isNotificationPending(identifier: String, completion: @escaping (Bool) -> Void) {
         notificationCenter.getPendingNotificationRequests { requests in
@@ -47,6 +48,13 @@ class NotificationService: ObservableObject {
     }
 
     func sendLocalNotification(title: String, identifier: String) {
+        let currentTime = Date()
+        if let lastTime = lastNotificationTime, currentTime.timeIntervalSince(lastTime) < notificationCooldown {
+            print("Notification skipped due to cooldown period")
+            return
+        }
+        lastNotificationTime = currentTime
+
         requestNotificationAuthorization { [weak self] granted in
             guard granted else {
                 print("Notification permission not granted. Cannot send notification.")

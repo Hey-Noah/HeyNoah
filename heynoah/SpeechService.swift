@@ -75,6 +75,11 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
     }
 
     func startTranscription(completion: @escaping (String?, Error?) -> Void) {
+        // Stop the audio engine if it is running
+        if audioEngine.isRunning {
+            stopAudioEngineSafely()
+        }
+
         guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
             print("Speech recognizer not available")
             completion(nil, NSError(domain: "SpeechService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Speech recognizer not available"]))
@@ -128,4 +133,14 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
             completion(nil, error)
         }
     }
+
+    func stopAudioEngineSafely() {
+        if audioEngine.isRunning {
+            audioEngine.stop()
+            audioEngine.inputNode.removeTap(onBus: 0)
+            recognitionTask?.cancel()
+            recognitionTask = nil
+        }
+    }
 }
+

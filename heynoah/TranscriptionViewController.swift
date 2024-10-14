@@ -3,8 +3,8 @@ import UIKit
 import AVFoundation
 
 class TranscriptionViewController: UIViewController {
-    private let transcriptionLabel = UILabel()
-    var fontSize: CGFloat = 32
+    let transcriptionLabel = UILabel()
+    var fontSize: CGFloat = 128
     var customName: String = "Noah"
     private var speechService: SpeechService
     private var notificationService: NotificationService
@@ -71,6 +71,6 @@ class TranscriptionViewController: UIViewController {
     }
 
     func updateFontSize(_ size: CGFloat) {
-        transcriptionLabel.font = UIFont.systemFont(ofSize: size)
+        transcriptionLabel.font = UIFont.systemFont(ofSize: min(size, 256))
     }
 }
