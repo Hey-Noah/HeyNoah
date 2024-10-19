@@ -1,5 +1,4 @@
-
-// View+Rotation.swift
+// RotateViewModifier.swift
 import SwiftUI
 
 struct RotateViewModifier: ViewModifier {

@@ -1,5 +1,4 @@
-
-// heynoahApp.swift
+// HeyNoahApp.swift
 import SwiftUI
 import UIKit
 import Speech
