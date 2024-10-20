@@ -115,13 +115,20 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
     }
 
     @objc private func handleAppWillResignActive() {
-        print("App will resign active - stopping audio engine")
-        stopAudioEngineSafely()
+        print("App will resign active - keeping audio engine running in the background")
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("Failed to keep audio session active: \(error.localizedDescription)")
+        }
     }
 
     @objc private func handleAppDidBecomeActive() {
-        print("App did become active - starting transcription")
-        startTranscription { _, _ in }
+        print("App did become active - ensuring transcription continues")
+        if !audioEngine.isRunning {
+            startTranscription { _, _ in }
+        }
     }
 
     func requestAllPermissions(completion: @escaping (Bool) -> Void) {
@@ -214,7 +221,7 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
         let audioSession = AVAudioSession.sharedInstance()
         do {
             print("Configuring audio session")
-            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.duckOthers, .allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])
+            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.mixWithOthers, .allowBluetooth, .allowBluetoothA2DP])
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             print("Audio session configured successfully")
         } catch {
@@ -300,4 +307,3 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
         }
     }
 }
-
