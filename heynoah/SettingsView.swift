@@ -1,8 +1,9 @@
+
+// SettingsView.swift
 import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var settingsManager: SettingsManager
-    @Binding var isPanelCollapsed: Bool
     @State private var useBluetoothMic: Bool = false
     @Environment(\.presentationMode) var presentationMode
 
@@ -34,6 +35,8 @@ struct SettingsView: View {
                     Text("Use Bluetooth Mic")
                         .foregroundColor(settingsManager.isDarkMode ? .white : .black)
                 }
+                .padding()
+                
                 .padding()
             }
             .padding()

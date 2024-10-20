@@ -118,11 +118,11 @@ class TranscriptionViewController: UIViewController {
                         self.transcriptionLabel.setNeedsDisplay()  // Ensure display is refreshed
                         print("Transcription label text after update: \(self.transcriptionLabel.text ?? "nil")")
                         self.logAppearanceState("Transcription updated")
-                        if transcription.localizedCaseInsensitiveContains(self.customName) {
+                        if transcription.localizedCaseInsensitiveContains(self.settingsManager.customName) {
                             self.notificationService.isNotificationPending(identifier: "NoahNotification") { [weak self] isPending in
                                 guard let self = self else { return }
                                 if !isPending {
-                                    self.notificationService.sendLocalNotification(title: "Someone is speaking to you, \(self.customName)!", identifier: "NoahNotification")
+                                    self.notificationService.sendLocalNotification(title: "Someone is speaking to you, \(self.settingsManager.customName)!", identifier: "NoahNotification")
                                 }
                             }
                         }

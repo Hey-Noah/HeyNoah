@@ -5,7 +5,6 @@ struct ContentView: View {
     @StateObject var settingsManager = SettingsManager()
     @StateObject var services = SharedServices() // Added services instance
     @State var isLoading: Bool = true
-    @State var isPanelCollapsed: Bool = true
     @State var viewKey: UUID = UUID() // Added viewKey instance
 
     var body: some View {
@@ -37,28 +36,13 @@ struct ContentView: View {
                             .onAppear {
                                 updateColorScheme()
                             }
-                        if !isPanelCollapsed {
-                            SettingsView(settingsManager: settingsManager, isPanelCollapsed: $isPanelCollapsed)
-                                .frame(maxWidth: .infinity)
-                                .background(settingsManager.isDarkMode ? Color.black : Color.white)
-                                .cornerRadius(16)
-                                .shadow(radius: 10)
-                                .transition(.move(edge: .bottom))
-                                .padding()
-                                .onAppear {
-                                    updateColorScheme()
-                                }
-                        }
                     }
                     .background(settingsManager.isDarkMode ? Color.black : Color.white)
                     .onAppear {
                         updateColorScheme()
                     }
                 }
-                Button(action: {
-                    print("Toggling settings panel visibility")
-                    isPanelCollapsed.toggle()
-                }) {
+                NavigationLink(destination: SettingsView(settingsManager: settingsManager)) {
                     Image(systemName: "gear")
                         .resizable()
                         .frame(width: 30, height: 30)
