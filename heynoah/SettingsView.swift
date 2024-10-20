@@ -14,7 +14,7 @@ struct SettingsView: View {
                         .font(.system(size: settingsManager.fontSize))
                         .foregroundColor(settingsManager.isDarkMode ? .white : .black)
                         .padding(.bottom, 4)
-                    Slider(value: $settingsManager.fontSize, in: 32...128, step: 2)
+                    Slider(value: $settingsManager.fontSize, in: 32...(UIDevice.current.userInterfaceIdiom == .phone ? 128 : 256), step: 2)
                         .padding()
                     HStack {
                         Toggle(isOn: $settingsManager.isDarkMode) {
