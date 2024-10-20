@@ -1,4 +1,3 @@
-
 // TranscriptionViewController.swift
 import UIKit
 import AVFoundation
@@ -111,22 +110,34 @@ class TranscriptionViewController: UIViewController {
                             print("Warning: Transcription result is empty")
                         }
                         print("Updating transcription label text to: \(transcription)")
-                        self.transcriptionLabel.text = transcription
-                        self.updateAppearance() // Update appearance to ensure proper colors
-                        self.transcriptionLabel.setNeedsLayout()  // Request a layout update
-                        self.transcriptionLabel.layoutIfNeeded()  // Force layout update
-                        self.transcriptionLabel.setNeedsDisplay()  // Ensure display is refreshed
-                        print("Transcription label text after update: \(self.transcriptionLabel.text ?? "nil")")
-                        self.logAppearanceState("Transcription updated")
-                        if transcription.localizedCaseInsensitiveContains(self.settingsManager.customName) {
-                            self.notificationService.isNotificationPending(identifier: "NoahNotification") { [weak self] isPending in
-                                guard let self = self else { return }
-                                if !isPending {
-                                    self.notificationService.sendLocalNotification(title: "Someone is speaking to you, \(self.settingsManager.customName)!", identifier: "NoahNotification")
-                                }
-                            }
-                        }
+                        self.updateTranscriptionLabel(with: transcription)
                     }
+                }
+            }
+        }
+    }
+
+    private func updateTranscriptionLabel(with transcription: String) {
+        transcriptionLabel.text = transcription
+        while transcriptionLabel.isTextTruncated() {
+            if let currentText = transcriptionLabel.text, let firstSpaceIndex = currentText.firstIndex(of: " ") {
+                transcriptionLabel.text = String(currentText[currentText.index(after: firstSpaceIndex)...])
+            } else {
+                break
+            }
+        }
+        self.updateAppearance() // Update appearance to ensure proper colors
+        transcriptionLabel.setNeedsLayout()  // Request a layout update
+        transcriptionLabel.layoutIfNeeded()  // Force layout update
+        transcriptionLabel.setNeedsDisplay()  // Ensure display is refreshed
+        print("Transcription label text after update: \(transcriptionLabel.text ?? "nil")")
+        logAppearanceState("Transcription updated")
+
+        if transcription.localizedCaseInsensitiveContains(self.settingsManager.customName) {
+            self.notificationService.isNotificationPending(identifier: "NoahNotification") { [weak self] isPending in
+                guard let self = self else { return }
+                if !isPending {
+                    self.notificationService.sendLocalNotification(title: "Someone is speaking to you, \(self.settingsManager.customName)!", identifier: "NoahNotification")
                 }
             }
         }
@@ -170,3 +181,18 @@ class TranscriptionViewController: UIViewController {
         print("\(context) - Dark Mode: \(isDarkMode), Label Text Color: \(transcriptionLabel.textColor?.description ?? "Unknown"), Background Color: \(view.backgroundColor?.description ?? "Unknown"), Label Text: \(transcriptionLabel.text ?? "nil")")
     }
 }
+
+private extension UILabel {
+    func isTextTruncated() -> Bool {
+        guard let labelText = self.text else { return false }
+        let size = CGSize(width: self.frame.width, height: .greatestFiniteMagnitude)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: self.font
+        ]
+        let textSize = (labelText as NSString).boundingRect(with: size, options: .usesLineFragmentOrigin, attributes: attributes, context: nil).size
+        return textSize.height > self.bounds.size.height
+    }
+}
+
+
+

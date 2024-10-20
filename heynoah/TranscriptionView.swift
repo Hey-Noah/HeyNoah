@@ -1,4 +1,6 @@
 
+
+
 // TranscriptionView.swift
 import SwiftUI
 import UIKit
@@ -21,5 +23,3 @@ struct TranscriptionView: UIViewControllerRepresentable {
         uiViewController.updateFontSize(settingsManager.fontSize)  // Update font size based on settingsManager
     }
 }
-
-
