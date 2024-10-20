@@ -1,4 +1,3 @@
-// Services.swift
 import Foundation
 import UserNotifications
 import Combine
@@ -43,7 +42,7 @@ class NotificationService: ObservableObject {
         }
 
         print("Requesting notification authorization")
-        notificationCenter.requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
+        notificationCenter.requestAuthorization(options: [.alert, .sound]) { [weak self] granted, error in
             DispatchQueue.main.async {
                 if let error = error {
                     print("Error requesting notification authorization: \(error.localizedDescription)")
@@ -76,7 +75,6 @@ class NotificationService: ObservableObject {
             let content = UNMutableNotificationContent()
             content.title = title
             content.sound = .default
-            content.badge = NSNumber(value: 1)
             let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
             self?.notificationCenter.add(request) { error in
                 if let error = error {
@@ -139,7 +137,7 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
         dispatchGroup.enter()
         requestMicrophoneAccess { microphoneGranted in
             print("Microphone access granted: \(microphoneGranted)")
-            if !microphoneGranted {
+            if (!microphoneGranted) {
                 allGranted = false
             }
             dispatchGroup.leave()
@@ -148,14 +146,14 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
         dispatchGroup.enter()
         requestSpeechAuthorization { speechAuthorized in
             print("Speech recognition authorized: \(speechAuthorized)")
-            if !speechAuthorized {
+            if (!speechAuthorized) {
                 allGranted = false
             }
             dispatchGroup.leave()
         }
 
         dispatchGroup.notify(queue: .main) {
-            if allGranted {
+            if (allGranted) {
                 print("All permissions granted")
                 completion(true)
             } else {
@@ -307,3 +305,4 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
         }
     }
 }
+
