@@ -424,6 +424,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = heynoah/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Hey Noah!";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_LSBackgroundOnly = NO;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
@@ -463,6 +465,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = heynoah/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Hey Noah!";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_LSBackgroundOnly = NO;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "We will use your bluetooth devices to make transcription as accurate as possible.";
