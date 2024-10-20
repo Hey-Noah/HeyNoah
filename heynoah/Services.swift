@@ -10,6 +10,7 @@ import UIKit // Added to access UIApplication
 class SharedServices: ObservableObject {
     @Published var speechService = SpeechService()
     @Published var notificationService = NotificationService()
+    @Published var settingsManager = SettingsManager() // Added settingsManager to SharedServices
 }
 
 class NotificationService: ObservableObject {
@@ -22,6 +23,7 @@ class NotificationService: ObservableObject {
         notificationCenter.getPendingNotificationRequests { requests in
             let isPending = requests.contains { $0.identifier == identifier }
             DispatchQueue.main.async {
+                print("Checked if notification is pending: \(isPending)")
                 completion(isPending)
             }
         }
@@ -33,6 +35,7 @@ class NotificationService: ObservableObject {
             notificationCenter.getNotificationSettings { settings in
                 let granted = settings.authorizationStatus == .authorized
                 DispatchQueue.main.async {
+                    print("Notification settings checked - authorization granted: \(granted)")
                     completion(granted)
                 }
             }
@@ -112,10 +115,12 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
     }
 
     @objc private func handleAppWillResignActive() {
+        print("App will resign active - stopping audio engine")
         stopAudioEngineSafely()
     }
 
     @objc private func handleAppDidBecomeActive() {
+        print("App did become active - starting transcription")
         startTranscription { _, _ in }
     }
 
@@ -126,6 +131,7 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
 
         dispatchGroup.enter()
         requestMicrophoneAccess { microphoneGranted in
+            print("Microphone access granted: \(microphoneGranted)")
             if !microphoneGranted {
                 allGranted = false
             }
@@ -134,6 +140,7 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
 
         dispatchGroup.enter()
         requestSpeechAuthorization { speechAuthorized in
+            print("Speech recognition authorized: \(speechAuthorized)")
             if !speechAuthorized {
                 allGranted = false
             }
@@ -153,16 +160,12 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
 
     func requestMicrophoneAccess(completion: @escaping (Bool) -> Void) {
         print("Requesting microphone access")
-        AVAudioApplication.requestRecordPermission(completionHandler: { granted in
+        AVAudioApplication.requestRecordPermission{ granted in
             DispatchQueue.main.async {
-                if granted {
-                    print("Microphone access granted")
-                } else {
-                    print("Microphone access denied")
-                }
+                print("Microphone access result: \(granted)")
                 completion(granted)
             }
-        })
+        }
     }
 
     func requestSpeechAuthorization(completion: @escaping (Bool) -> Void) {
@@ -174,7 +177,7 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
                     print("Speech recognition authorized")
                     completion(true)
                 default:
-                    print("Speech recognition not authorized")
+                    print("Speech recognition not authorized: \(authStatus)")
                     completion(false)
                 }
             }
@@ -182,15 +185,20 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
     }
 
     func startTranscription(completion: @escaping (String?, Error?) -> Void) {
-        guard !isTranscribing else { return } // Avoid starting transcription if already in progress
+        guard !isTranscribing else {
+            print("Transcription already in progress - skipping start")
+            return
+        } // Avoid starting transcription if already in progress
         isTranscribing = true
 
         // Stop the audio engine if it is running
         if audioEngine.isRunning {
+            print("Audio engine running - stopping before reconfiguration")
             stopAudioEngineSafely()
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { // Increased delay to ensure proper cleanup
+            print("Configuring and starting audio engine for transcription")
             self.configureAndStartAudioEngine(completion: completion)
         }
     }
@@ -263,6 +271,7 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
 
     func stopAudioEngineSafely() {
         if audioEngine.isRunning {
+            print("Stopping audio engine safely")
             audioEngine.stop()
             audioEngine.inputNode.removeTap(onBus: 0)
             recognitionTask?.cancel()
@@ -291,3 +300,4 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
         }
     }
 }
+

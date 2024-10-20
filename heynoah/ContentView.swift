@@ -1,82 +1,80 @@
-
 // ContentView.swift
 import SwiftUI
 
 struct ContentView: View {
-    @State var isDarkMode: Bool = false
-    @State var fontSize: CGFloat = 64
-    @State var customName: String = "Noah"
-    @StateObject var services = SharedServices()
+    @StateObject var settingsManager = SettingsManager()
+    @StateObject var services = SharedServices() // Added services instance
     @State var isLoading: Bool = true
     @State var isPanelCollapsed: Bool = true
-    @State var viewKey: UUID = UUID()  // Used to reinitialize the view
+    @State var viewKey: UUID = UUID() // Added viewKey instance
 
     var body: some View {
         NavigationView {
-            GeometryReader { geometry in
-                VStack(spacing: 0) {
-                    if isLoading {
-                        ProgressView("Requesting Permissions...")
-                            .padding()
-                    } else {
-                        VStack(spacing: 0) {
-                            TranscriptionView(fontSize: $fontSize, customName: $customName, services: services)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .background(isDarkMode ? Color.black : Color.white)
-                                .cornerRadius(16)
-                                .clipped()
-                                .padding(.top, geometry.safeAreaInsets.top)
-                                .padding(.bottom, geometry.safeAreaInsets.bottom)
-                            if !isPanelCollapsed {
-                                SettingsView(isDarkMode: $isDarkMode, fontSize: $fontSize, customName: $customName, isPanelCollapsed: $isPanelCollapsed)
-                                    .frame(maxWidth: .infinity)
-                                    .background(isDarkMode ? Color.black : Color.white)
-                                    .cornerRadius(16)
-                                    .shadow(radius: 10)
-                                    .transition(.move(edge: .bottom))
-                                    .padding()
-                            }
-                        }
-                        Button(action: {
-                            stopSpeechServiceBeforeNavigation()  // Stop the speech service before navigating
-                            viewKey = UUID()  // Destroy the current view
-                        }) {
-                            NavigationLink(destination: SettingsView(isDarkMode: $isDarkMode, fontSize: $fontSize, customName: $customName, isPanelCollapsed: $isPanelCollapsed).onDisappear {
-                                restartSpeechServiceWithDelay()
-                            }) {
-                                Image(systemName: "gear")
-                                    .resizable()
-                                    .frame(width: 36, height: 36)
-                                    .padding()
-                            }
-                        }
+            VStack {
+                if isLoading {
+                    ProgressView("Requesting Permissions...")
                         .padding()
-                    }
-                }
-                .background(isDarkMode ? Color.black : Color.white)
-                .edgesIgnoringSafeArea(.all)
-                .onAppear {
-                    services.speechService.requestAllPermissions { granted in
-                        DispatchQueue.main.async {
-                            isLoading = !granted
-                            if granted {
-                                startSpeechService()
+                        .onAppear {
+                            print("ContentView appeared - requesting permissions")
+                            services.speechService.requestAllPermissions { granted in
+                                DispatchQueue.main.async {
+                                    print("Permissions granted: \(granted)")
+                                    if granted {
+                                        isLoading = false
+                                    } else {
+                                        print("Permissions were not granted.")
+                                    }
+                                }
                             }
                         }
+                } else {
+                    VStack {
+                        TranscriptionView(settingsManager: settingsManager)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(settingsManager.isDarkMode ? Color.black : Color.white)
+                            .cornerRadius(16)
+                            .clipped()
+                            .onAppear {
+                                updateColorScheme()
+                            }
+                        if !isPanelCollapsed {
+                            SettingsView(settingsManager: settingsManager, isPanelCollapsed: $isPanelCollapsed)
+                                .frame(maxWidth: .infinity)
+                                .background(settingsManager.isDarkMode ? Color.black : Color.white)
+                                .cornerRadius(16)
+                                .shadow(radius: 10)
+                                .transition(.move(edge: .bottom))
+                                .padding()
+                                .onAppear {
+                                    updateColorScheme()
+                                }
+                        }
                     }
-                    updateColorScheme()
+                    .background(settingsManager.isDarkMode ? Color.black : Color.white)
+                    .onAppear {
+                        updateColorScheme()
+                    }
                 }
-                .id(viewKey)  // Reinitialize view using this key
-                .onRotate { _ in
-                    gracefullyReinitializeView()
+                Button(action: {
+                    print("Toggling settings panel visibility")
+                    isPanelCollapsed.toggle()
+                }) {
+                    Image(systemName: "gear")
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                        .padding()
                 }
             }
+            .background(settingsManager.isDarkMode ? Color.black : Color.white)
+            .onAppear {
+                updateColorScheme()
+            }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private func updateColorScheme() {
-        let newColorScheme: UIUserInterfaceStyle = isDarkMode ? .dark : .light
+        let newColorScheme: UIUserInterfaceStyle = settingsManager.isDarkMode ? .dark : .light
+        print("Updating color scheme to: \(newColorScheme == .dark ? "Dark Mode" : "Light Mode")")
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             windowScene.windows.first?.overrideUserInterfaceStyle = newColorScheme
         }
@@ -85,12 +83,14 @@ struct ContentView: View {
     private func gracefullyReinitializeView() {
         // Add guardrails to prevent runtime exceptions during rotation
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            print("Gracefully reinitializing view")
             services.speechService.stopAudioEngineSafely()  // Stop the audio engine before reinitializing the view
             viewKey = UUID()  // Trigger a reinitialization of the view with a new key
         }
     }
 
     private func startSpeechService() {
+        print("Starting speech service transcription")
         services.speechService.startTranscription { result, error in
             if let error = error {
                 print("Error starting transcription: \(error.localizedDescription)")
@@ -101,11 +101,13 @@ struct ContentView: View {
     }
 
     private func stopSpeechServiceBeforeNavigation() {
+        print("Stopping speech service before navigation")
         services.speechService.stopAudioEngineSafely()
     }
 
     private func restartSpeechServiceWithDelay() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            print("Restarting speech service with delay")
             services.speechService.stopAudioEngineSafely()  // Ensure the engine is stopped before starting again
             startSpeechService()
         }

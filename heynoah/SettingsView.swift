@@ -1,45 +1,39 @@
-
-// SettingsView.swift
 import SwiftUI
 
 struct SettingsView: View {
-    @Binding var isDarkMode: Bool
-    @Binding var fontSize: CGFloat
-    @Binding var customName: String
+    @ObservedObject var settingsManager: SettingsManager
     @Binding var isPanelCollapsed: Bool
     @State private var useBluetoothMic: Bool = false
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         ZStack {
-            (isDarkMode ? Color.black : Color.white)
+            (settingsManager.isDarkMode ? Color.black : Color.white)
                 .edgesIgnoringSafeArea(.all)
             VStack {
                 Text("Font Size")
-                    .font(.system(size: fontSize))
-                    .foregroundColor(isDarkMode ? .white : .black)
+                    .font(.system(size: settingsManager.fontSize))
+                    .foregroundColor(settingsManager.isDarkMode ? .white : .black)
                     .padding(.bottom, 4)
-                Slider(value: $fontSize, in: 32...128, step: 2)
+                Slider(value: $settingsManager.fontSize, in: 32...128, step: 2)
                     .padding()
                 HStack {
-                    Toggle(isOn: $isDarkMode) {
+                    Toggle(isOn: $settingsManager.isDarkMode) {
                         Text("Dark Mode")
-                            .foregroundColor(isDarkMode ? .white : .black)
+                            .foregroundColor(settingsManager.isDarkMode ? .white : .black)
                     }
                     .padding()
                     Spacer()
                 }
-                TextField("Enter Custom Name", text: $customName)
+                TextField("Enter Custom Name", text: $settingsManager.customName)
                     .padding()
-                    .background(isDarkMode ? Color.gray.opacity(0.2) : Color.white)
+                    .background(settingsManager.isDarkMode ? Color.gray.opacity(0.2) : Color.white)
                     .cornerRadius(8)
-                    .foregroundColor(isDarkMode ? .white : .black)
+                    .foregroundColor(settingsManager.isDarkMode ? .white : .black)
                 Toggle(isOn: $useBluetoothMic) {
                     Text("Use Bluetooth Mic")
-                        .foregroundColor(isDarkMode ? .white : .black)
+                        .foregroundColor(settingsManager.isDarkMode ? .white : .black)
                 }
-                .padding()
-                
                 .padding()
             }
             .padding()
@@ -47,20 +41,10 @@ struct SettingsView: View {
                 updateColorScheme()
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ReinitializeContentView"))) { _ in
-            DispatchQueue.main.async {
-                let rootView = ContentView()
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first {
-                    window.rootViewController = UIHostingController(rootView: rootView)
-                    window.makeKeyAndVisible()
-                }
-            }
-        }
     }
 
     private func updateColorScheme() {
-        let newColorScheme: UIUserInterfaceStyle = isDarkMode ? .dark : .light
+        let newColorScheme: UIUserInterfaceStyle = settingsManager.isDarkMode ? .dark : .light
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             windowScene.windows.first?.overrideUserInterfaceStyle = newColorScheme
         }
