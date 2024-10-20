@@ -1,4 +1,3 @@
-// ContentView.swift
 import SwiftUI
 
 struct ContentView: View {
@@ -8,52 +7,57 @@ struct ContentView: View {
     @State var viewKey: UUID = UUID() // Added viewKey instance
 
     var body: some View {
-        NavigationView {
-            VStack {
-                if isLoading {
-                    ProgressView("Requesting Permissions...")
-                        .padding()
-                        .onAppear {
-                            print("ContentView appeared - requesting permissions")
-                            services.speechService.requestAllPermissions { granted in
-                                DispatchQueue.main.async {
-                                    print("Permissions granted: \(granted)")
-                                    if granted {
-                                        isLoading = false
-                                    } else {
-                                        print("Permissions were not granted.")
+        NavigationStack {
+            GeometryReader { geometry in
+                VStack {
+                    if isLoading {
+                        ProgressView("Requesting Permissions...")
+                            .padding()
+                            .onAppear {
+                                print("ContentView appeared - requesting permissions")
+                                services.speechService.requestAllPermissions { granted in
+                                    DispatchQueue.main.async {
+                                        print("Permissions granted: \(granted)")
+                                        if granted {
+                                            isLoading = false
+                                        } else {
+                                            print("Permissions were not granted.")
+                                        }
                                     }
                                 }
                             }
+                    } else {
+                        VStack {
+                            TranscriptionView(settingsManager: settingsManager)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(settingsManager.isDarkMode ? Color.black : Color.white)
+                                .cornerRadius(16)
+                                .clipped()
+                                .onAppear {
+                                    updateColorScheme()
+                                }
                         }
-                } else {
-                    VStack {
-                        TranscriptionView(settingsManager: settingsManager)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(settingsManager.isDarkMode ? Color.black : Color.white)
-                            .cornerRadius(16)
-                            .clipped()
-                            .onAppear {
-                                updateColorScheme()
-                            }
+                        .frame(maxWidth: geometry.size.width * 0.9, maxHeight: geometry.size.height * 0.8)
+                        .background(settingsManager.isDarkMode ? Color.black : Color.white)
+                        .onAppear {
+                            updateColorScheme()
+                        }
                     }
-                    .background(settingsManager.isDarkMode ? Color.black : Color.white)
-                    .onAppear {
-                        updateColorScheme()
+                    NavigationLink(destination: SettingsView(settingsManager: settingsManager)) {
+                        Image(systemName: "gear")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .padding()
                     }
                 }
-                NavigationLink(destination: SettingsView(settingsManager: settingsManager)) {
-                    Image(systemName: "gear")
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                        .padding()
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .background(settingsManager.isDarkMode ? Color.black : Color.white)
+                .onAppear {
+                    updateColorScheme()
                 }
-            }
-            .background(settingsManager.isDarkMode ? Color.black : Color.white)
-            .onAppear {
-                updateColorScheme()
             }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private func updateColorScheme() {
