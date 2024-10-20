@@ -250,7 +250,6 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
                 return
             }
             if let result = result {
-                print("Recognition task result: \(result.bestTranscription.formattedString)")
                 completion(result.bestTranscription.formattedString, nil)
                 // Automatically continue without restarting on final result
             }

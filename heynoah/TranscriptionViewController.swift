@@ -71,7 +71,6 @@ class TranscriptionViewController: UIViewController {
 
     func updateFontSize(_ size: CGFloat) {
         transcriptionLabel.font = UIFont.systemFont(ofSize: min(size, 256))
-        print("Font size updated to: \(size)")
     }
 
     func updateTranscriptionHandler() {
@@ -105,11 +104,9 @@ class TranscriptionViewController: UIViewController {
                         return
                     }
                     if let transcription = transcription {
-                        print("Transcription: \(transcription)")
                         if transcription.isEmpty {
                             print("Warning: Transcription result is empty")
                         }
-                        print("Updating transcription label text to: \(transcription)")
                         self.updateTranscriptionLabel(with: transcription)
                     }
                 }
@@ -130,7 +127,6 @@ class TranscriptionViewController: UIViewController {
         transcriptionLabel.setNeedsLayout()  // Request a layout update
         transcriptionLabel.layoutIfNeeded()  // Force layout update
         transcriptionLabel.setNeedsDisplay()  // Ensure display is refreshed
-        print("Transcription label text after update: \(transcriptionLabel.text ?? "nil")")
         logAppearanceState("Transcription updated")
 
         if transcription.localizedCaseInsensitiveContains(self.settingsManager.customName) {
@@ -178,7 +174,6 @@ class TranscriptionViewController: UIViewController {
 
     private func logAppearanceState(_ context: String) {
         let isDarkMode = settingsManager.isDarkMode
-        print("\(context) - Dark Mode: \(isDarkMode), Label Text Color: \(transcriptionLabel.textColor?.description ?? "Unknown"), Background Color: \(view.backgroundColor?.description ?? "Unknown"), Label Text: \(transcriptionLabel.text ?? "nil")")
     }
 }
 
