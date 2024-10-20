@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var settingsManager: SettingsManager
-    @State private var useBluetoothMic: Bool = false
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
@@ -31,11 +30,6 @@ struct SettingsView: View {
                         .cornerRadius(8)
                         .foregroundColor(settingsManager.isDarkMode ? .white : .black)
                         .frame(maxWidth: geometry.size.width * 0.9)
-                    Toggle(isOn: $useBluetoothMic) {
-                        Text("Use Bluetooth Mic")
-                            .foregroundColor(settingsManager.isDarkMode ? .white : .black)
-                    }
-                    .padding()
                 }
                 .padding()
                 .frame(maxWidth: geometry.size.width * 0.9, maxHeight: geometry.size.height * 0.8)
