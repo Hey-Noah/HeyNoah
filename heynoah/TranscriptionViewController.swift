@@ -25,6 +25,7 @@ class TranscriptionViewController: UIViewController {
     }
 
     override func viewDidLoad() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleTranscriptionStatusChange), name: SpeechService.transcriptionStatusNotification, object: nil)
         super.viewDidLoad()
         print("viewDidLoad called")
         setupTranscriptionLabel()
@@ -114,6 +115,12 @@ class TranscriptionViewController: UIViewController {
         }
     }
 
+    @objc private func handleTranscriptionStatusChange(notification: Notification) {
+        if let status = notification.userInfo?["status"] as? String {
+            transcriptionLabel.text = status
+        }
+    }
+
     private func updateTranscriptionLabel(with transcription: String) {
         transcriptionLabel.text = transcription
         while transcriptionLabel.isTextTruncated() {
@@ -188,6 +195,5 @@ private extension UILabel {
         return textSize.height > self.bounds.size.height
     }
 }
-
 
 

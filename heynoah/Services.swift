@@ -87,12 +87,16 @@ class NotificationService: ObservableObject {
     }
 }
 
+
+
+
 // SpeechService.swift
 import Foundation
 import Speech
 import AVFoundation
 
 class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
+    static let transcriptionStatusNotification = Notification.Name("TranscriptionStatusChanged")
     private let speechRecognizer = SFSpeechRecognizer()
     private let audioEngine = AVAudioEngine()
     private var request = SFSpeechAudioBufferRecognitionRequest()
@@ -190,6 +194,12 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
     }
 
     func startTranscription(completion: @escaping (String?, Error?) -> Void) {
+        // Notify that initialization is starting
+        NotificationCenter.default.post(name: SpeechService.transcriptionStatusNotification, object: nil, userInfo: ["status": "Initializing..."])
+        // Set initializing text before starting transcription
+        DispatchQueue.main.async {
+            print("Initializing...")
+        }
         guard !isTranscribing else {
             print("Transcription already in progress - skipping start")
             return
@@ -265,6 +275,11 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
             audioEngine.prepare()
             try audioEngine.start()
             print("Audio engine started successfully")
+            // Notify that transcription is now listening
+            NotificationCenter.default.post(name: SpeechService.transcriptionStatusNotification, object: nil, userInfo: ["status": "Listening..."])
+            DispatchQueue.main.async {
+                print("Listening...")
+            }
         } catch {
             print("Failed to start audio engine: \(error.localizedDescription)")
             completion(nil, error)
@@ -304,4 +319,3 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
         }
     }
 }
-
