@@ -12,13 +12,33 @@ class SharedServices: ObservableObject {
     @Published var settingsManager = SettingsManager() // Added settingsManager to SharedServices
 }
 
-
 class SettingsManager: ObservableObject {
     @Published var isDarkMode: Bool = false
+    @Published var isKidModeEnabled: Bool = false
     @Published var fontSize: CGFloat = 64
     @Published var customName: String = "Noah"
+    
+    // Load kidUnfriendlyWords from JSON file
+    private(set) var kidUnfriendlyWords: [String: String] = [:]
+    
+    init() {
+        loadKidUnfriendlyWords()
+    }
+    
+    private func loadKidUnfriendlyWords() {
+        if let url = Bundle.main.url(forResource: "KidUnfriendlyWords", withExtension: "json") {
+            do {
+                let data = try Data(contentsOf: url)
+                let decodedWords = try JSONDecoder().decode([String: String].self, from: data)
+                kidUnfriendlyWords = decodedWords
+            } catch {
+                print("Failed to load kid unfriendly words: \(error)")
+            }
+        } else {
+            print("KidUnfriendlyWords.json file not found")
+        }
+    }
 }
-
 
 class NotificationService: ObservableObject {
     private let notificationCenter = UNUserNotificationCenter.current()
@@ -94,6 +114,3 @@ class NotificationService: ObservableObject {
         }
     }
 }
-
-
-

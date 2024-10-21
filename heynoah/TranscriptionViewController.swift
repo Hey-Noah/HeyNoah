@@ -50,7 +50,6 @@ class TranscriptionViewController: UIViewController {
         let isDarkMode = settingsManager.isDarkMode  // Use settingsManager for dark mode status
         view.backgroundColor = isDarkMode ? .black : .white
         transcriptionLabel.textColor = isDarkMode ? .white : .black
-        logAppearanceState("Appearance updated")
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -95,7 +94,6 @@ class TranscriptionViewController: UIViewController {
                         self.transcriptionLabel.text = "Error: \(error.localizedDescription)"
                         self.updateAppearance() // Update appearance to ensure proper colors
                         self.transcriptionLabel.setNeedsDisplay() // Ensure display is refreshed
-                        self.logAppearanceState("Error state applied to transcription label")
                         if (error as NSError).domain == "kAFAssistantErrorDomain" && (error as NSError).code == 1101 {
                             self.showAlert(title: "Speech Recognition Error", message: "The speech recognition service is currently unavailable. Please try again later.")
                             self.handleAudioSessionInterruption()  // Handle interruption by resetting audio session
@@ -122,7 +120,23 @@ class TranscriptionViewController: UIViewController {
     }
 
     private func updateTranscriptionLabel(with transcription: String) {
-        transcriptionLabel.text = transcription
+        let words = transcription.split(separator: " ")
+        var maskedWords: [String] = []
+        
+        for word in words {
+            if settingsManager.isKidModeEnabled {
+                let encodedWord = word.lowercased().data(using: .utf8)?.base64EncodedString() ?? ""
+                if let emoji = settingsManager.kidUnfriendlyWords[encodedWord] {
+                    maskedWords.append(emoji)
+                } else {
+                    maskedWords.append(String(word))
+                }
+            } else {
+                maskedWords.append(String(word))
+            }
+        }
+        
+        transcriptionLabel.text = maskedWords.joined(separator: " ")
         while transcriptionLabel.isTextTruncated() {
             if let currentText = transcriptionLabel.text, let firstSpaceIndex = currentText.firstIndex(of: " ") {
                 transcriptionLabel.text = String(currentText[currentText.index(after: firstSpaceIndex)...])
@@ -134,7 +148,6 @@ class TranscriptionViewController: UIViewController {
         transcriptionLabel.setNeedsLayout()  // Request a layout update
         transcriptionLabel.layoutIfNeeded()  // Force layout update
         transcriptionLabel.setNeedsDisplay()  // Ensure display is refreshed
-        logAppearanceState("Transcription updated")
 
         if transcription.localizedCaseInsensitiveContains(self.settingsManager.customName) {
             self.notificationService.isNotificationPending(identifier: "NoahNotification") { [weak self] isPending in
@@ -179,9 +192,7 @@ class TranscriptionViewController: UIViewController {
         present(alert, animated: true, completion: nil)
     }
 
-    private func logAppearanceState(_ context: String) {
-        let isDarkMode = settingsManager.isDarkMode
-    }
+
 }
 
 private extension UILabel {
@@ -189,11 +200,9 @@ private extension UILabel {
         guard let labelText = self.text else { return false }
         let size = CGSize(width: self.frame.width, height: .greatestFiniteMagnitude)
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: self.font
+            .font: self.font ?? UIFont.systemFont(ofSize: UIFont.systemFontSize)
         ]
         let textSize = (labelText as NSString).boundingRect(with: size, options: .usesLineFragmentOrigin, attributes: attributes, context: nil).size
         return textSize.height > self.bounds.size.height
     }
 }
-
-

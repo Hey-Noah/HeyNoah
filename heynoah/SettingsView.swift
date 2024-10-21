@@ -24,6 +24,14 @@ struct SettingsView: View {
                         .padding()
                         Spacer()
                     }
+                    HStack {
+                        Toggle(isOn: $settingsManager.isKidModeEnabled) {
+                            Text("Kid Mode 🌈🪁")
+                                .foregroundColor(settingsManager.isDarkMode ? .white : .black)
+                        }
+                        .padding()
+                        Spacer()
+                    }
                     TextField("Enter Custom Name", text: $settingsManager.customName)
                         .padding()
                         .background(settingsManager.isDarkMode ? Color.gray.opacity(0.2) : Color.white)
