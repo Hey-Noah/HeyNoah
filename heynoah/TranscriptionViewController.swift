@@ -40,7 +40,7 @@ class TranscriptionViewController: UIViewController {
         transcriptionLabel.font = UIFont.systemFont(ofSize: settingsManager.fontSize)  // Use settingsManager for font size
         transcriptionLabel.textAlignment = .center
         transcriptionLabel.numberOfLines = 0
-        transcriptionLabel.text = "Listening..."
+        transcriptionLabel.text = "Initializing..."
         transcriptionLabel.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(transcriptionLabel)
         updateAppearance() // Set appearance during initial setup
