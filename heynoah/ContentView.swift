@@ -5,6 +5,7 @@ struct ContentView: View {
     @StateObject var services = SharedServices() // Added services instance
     @State var isLoading: Bool = true
     @State var viewKey: UUID = UUID() // Added viewKey instance
+    @State var showWelcomeScreen: Bool = !UserDefaults.standard.bool(forKey: "hasSeenWelcomeScreen") // Check if the welcome screen has been shown
 
     var body: some View {
         NavigationStack {
@@ -58,6 +59,9 @@ struct ContentView: View {
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .fullScreenCover(isPresented: $showWelcomeScreen) {
+            WelcomeScreen(showWelcomeScreen: $showWelcomeScreen)
+        }
     }
 
     private func updateColorScheme() {
