@@ -16,20 +16,21 @@ struct ContentView: View {
                             .onDisappear {
                                 requestPermissions()
                             }
-                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .frame(width: min(geometry.size.width, 600), height: geometry.size.height) // Limit maximum width to 600
                             .background(settingsManager.isDarkMode ? Color.black : Color.white)
                             .edgesIgnoringSafeArea(.all)
+                            .frame(maxWidth: .infinity, alignment: .center) // Center the content
                     } else if isLoading {
                         ProgressView("Requesting Permissions...")
                             .padding()
                             .background(settingsManager.isDarkMode ? Color.black : Color.white)
                             .foregroundColor(settingsManager.isDarkMode ? Color.white : Color.black)
                             .cornerRadius(10)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center) // Center the content
                     } else {
                         VStack {
                             TranscriptionView(settingsManager: settingsManager, speechService: services.speechService, notificationService: services.notificationService)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .frame(maxWidth: min(geometry.size.width, 800), maxHeight: .infinity) // Limit maximum width to 800
                                 .background(settingsManager.isDarkMode ? Color.black : Color.white)
                                 .cornerRadius(16)
                                 .clipped()
@@ -48,12 +49,13 @@ struct ContentView: View {
                             }
                             .padding(.bottom, 20)
                         }
-                        .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height)
+                        .frame(maxWidth: min(geometry.size.width, 800), maxHeight: geometry.size.height) // Limit maximum width to 800
                         .background(settingsManager.isDarkMode ? Color.black : Color.white)
                         .onAppear {
                             updateColorScheme()
                         }
                         .edgesIgnoringSafeArea(.all)
+                        .frame(maxWidth: .infinity, alignment: .center) // Center the content
                     }
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
