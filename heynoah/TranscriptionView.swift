@@ -6,13 +6,16 @@ import SwiftUI
 import UIKit
 import Speech
 
+
 struct TranscriptionView: UIViewControllerRepresentable {
     @ObservedObject var settingsManager: SettingsManager
+    var speechService: SpeechService
+    var notificationService: NotificationService
 
     func makeUIViewController(context: Context) -> TranscriptionViewController {
         let controller = TranscriptionViewController(
-            speechService: SpeechService(),
-            notificationService: NotificationService(),
+            speechService: speechService,
+            notificationService: notificationService,
             settingsManager: settingsManager  // Pass settingsManager to the controller
         )
         return controller

@@ -2,22 +2,24 @@
 import UIKit
 import AVFoundation
 import Speech
+import Combine
 
-class TranscriptionViewController: UIViewController {
+class TranscriptionViewController: UIViewController, SpeechServiceDelegate {
     let transcriptionLabel = UILabel()
     var fontSize: CGFloat = 128
     var customName: String = "Noah"
     private var speechService: SpeechService
     private var notificationService: NotificationService
     private var settingsManager: SettingsManager  // Added settingsManager reference
-    private var currentTranscriptionTask: SFSpeechRecognitionTask?
     private var isTranscribing: Bool = false
+    private var subscriptions = Set<AnyCancellable>()
 
     init(speechService: SpeechService, notificationService: NotificationService, settingsManager: SettingsManager) {
         self.speechService = speechService
         self.notificationService = notificationService
         self.settingsManager = settingsManager  // Initialize settingsManager
         super.init(nibName: nil, bundle: nil)
+        self.speechService.delegate = self
     }
 
     required init?(coder: NSCoder) {
@@ -25,13 +27,27 @@ class TranscriptionViewController: UIViewController {
     }
 
     override func viewDidLoad() {
-        NotificationCenter.default.addObserver(self, selector: #selector(handleTranscriptionStatusChange), name: SpeechService.transcriptionStatusNotification, object: nil)
         super.viewDidLoad()
+        NotificationCenter.default.addObserver(self, selector: #selector(handleTranscriptionStatusChange), name: SpeechService.transcriptionStatusNotification, object: nil)
         print("viewDidLoad called")
+        speechService.requestAllPermissions { [weak self] granted in
+            if granted {
+                self?.initializeViewComponents()
+            } else {
+                self?.showAlert(title: "Permission Denied", message: "Permissions are required to proceed.")
+            }
+        }
+    }
+
+    private func initializeViewComponents() {
         setupTranscriptionLabel()
         configureAudioSessionForBackground()
         updateAppearance() // Ensure appearance is updated initially
-        startTranscription()
+    }
+
+    func permissionsGranted() {
+        // Permission callback; ensure UI and services are initialized after permissions are granted.
+        initializeViewComponents()
     }
 
     private func setupTranscriptionLabel() {
@@ -44,6 +60,57 @@ class TranscriptionViewController: UIViewController {
         transcriptionLabel.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(transcriptionLabel)
         updateAppearance() // Set appearance during initial setup
+        
+        speechService.$transcriptionText
+            .receive(on: RunLoop.main)
+            .sink { [weak self] newText in
+                self?.processTranscriptionText(newText)
+            }
+            .store(in: &subscriptions) // Automatically update label
+    }
+
+    private func processTranscriptionText(_ transcription: String) {
+        let words = transcription.split(separator: " ")
+        var maskedWords: [String] = []
+        
+        for word in words {
+            if settingsManager.isKidModeEnabled {
+                let encodedWord = word.lowercased().data(using: .utf8)?.base64EncodedString() ?? ""
+                if let emoji = settingsManager.kidUnfriendlyWords[encodedWord] {
+                    maskedWords.append(emoji)
+                } else {
+                    maskedWords.append(String(word))
+                }
+            } else {
+                maskedWords.append(String(word))
+            }
+        }
+        
+        let processedText = maskedWords.joined(separator: " ")
+        transcriptionLabel.text = processedText
+        checkForCustomName(in: processedText)
+        while transcriptionLabel.isTextTruncated() {
+            if let currentText = transcriptionLabel.text, let firstSpaceIndex = currentText.firstIndex(of: " ") {
+                transcriptionLabel.text = String(currentText[currentText.index(after: firstSpaceIndex)...])
+            } else {
+                break
+            }
+        }
+        self.updateAppearance() // Update appearance to ensure proper colors
+        transcriptionLabel.setNeedsLayout()  // Request a layout update
+        transcriptionLabel.layoutIfNeeded()  // Force layout update
+        transcriptionLabel.setNeedsDisplay()  // Ensure display is refreshed
+    }
+
+    private func checkForCustomName(in text: String) {
+        if text.localizedCaseInsensitiveContains(self.settingsManager.customName) {
+            self.notificationService.isNotificationPending(identifier: "NoahNotification") { [weak self] isPending in
+                guard let self = self else { return }
+                if !isPending {
+                    self.notificationService.sendLocalNotification(title: "Someone is speaking to you, \(self.settingsManager.customName)!", identifier: "NoahNotification")
+                }
+            }
+        }
     }
 
     func updateAppearance() {
@@ -79,8 +146,8 @@ class TranscriptionViewController: UIViewController {
         startTranscription()  // Restart transcription with updated settings
     }
 
-    private func startTranscription() {
-        guard !isTranscribing else { return }  // Prevent reinitialization if already transcribing
+    func startTranscription() {
+        guard !isTranscribing, speechService.permissionsGranted else { return }  // Prevent reinitialization if already transcribing or permissions are not granted
         isTranscribing = true
         print("Starting transcription")
         
@@ -94,7 +161,7 @@ class TranscriptionViewController: UIViewController {
                         self.transcriptionLabel.text = "Error: \(error.localizedDescription)"
                         self.updateAppearance() // Update appearance to ensure proper colors
                         self.transcriptionLabel.setNeedsDisplay() // Ensure display is refreshed
-                        if (error as NSError).domain == "kAFAssistantErrorDomain" && (error as NSError).code == 1101 {
+                        if (error as NSError).domain == "SpeechService" && (error as NSError).code == 1101 {
                             self.showAlert(title: "Speech Recognition Error", message: "The speech recognition service is currently unavailable. Please try again later.")
                             self.handleAudioSessionInterruption()  // Handle interruption by resetting audio session
                         }
@@ -106,7 +173,7 @@ class TranscriptionViewController: UIViewController {
                         if transcription.isEmpty {
                             print("Warning: Transcription result is empty")
                         }
-                        self.updateTranscriptionLabel(with: transcription)
+                        self.processTranscriptionText(transcription)
                     }
                 }
             }
@@ -119,52 +186,7 @@ class TranscriptionViewController: UIViewController {
         }
     }
 
-    private func updateTranscriptionLabel(with transcription: String) {
-        let words = transcription.split(separator: " ")
-        var maskedWords: [String] = []
-        
-        for word in words {
-            if settingsManager.isKidModeEnabled {
-                let encodedWord = word.lowercased().data(using: .utf8)?.base64EncodedString() ?? ""
-                if let emoji = settingsManager.kidUnfriendlyWords[encodedWord] {
-                    maskedWords.append(emoji)
-                } else {
-                    maskedWords.append(String(word))
-                }
-            } else {
-                maskedWords.append(String(word))
-            }
-        }
-        
-        transcriptionLabel.text = maskedWords.joined(separator: " ")
-        while transcriptionLabel.isTextTruncated() {
-            if let currentText = transcriptionLabel.text, let firstSpaceIndex = currentText.firstIndex(of: " ") {
-                transcriptionLabel.text = String(currentText[currentText.index(after: firstSpaceIndex)...])
-            } else {
-                break
-            }
-        }
-        self.updateAppearance() // Update appearance to ensure proper colors
-        transcriptionLabel.setNeedsLayout()  // Request a layout update
-        transcriptionLabel.layoutIfNeeded()  // Force layout update
-        transcriptionLabel.setNeedsDisplay()  // Ensure display is refreshed
-
-        if transcription.localizedCaseInsensitiveContains(self.settingsManager.customName) {
-            self.notificationService.isNotificationPending(identifier: "NoahNotification") { [weak self] isPending in
-                guard let self = self else { return }
-                if !isPending {
-                    self.notificationService.sendLocalNotification(title: "Someone is speaking to you, \(self.settingsManager.customName)!", identifier: "NoahNotification")
-                }
-            }
-        }
-    }
-
     private func stopTranscription() {
-        if let currentTranscriptionTask = currentTranscriptionTask {
-            print("Stopping current transcription task")
-            currentTranscriptionTask.cancel()
-            self.currentTranscriptionTask = nil
-        }
         speechService.stopAudioEngineSafely()
         isTranscribing = false
     }
@@ -191,8 +213,6 @@ class TranscriptionViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
     }
-
-
 }
 
 private extension UILabel {

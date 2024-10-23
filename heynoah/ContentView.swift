@@ -3,33 +3,32 @@ import SwiftUI
 struct ContentView: View {
     @StateObject var settingsManager = SettingsManager()
     @StateObject var services = SharedServices() // Added services instance
-    @State var isLoading: Bool = true
+    @State var isLoading: Bool = false
     @State var viewKey: UUID = UUID() // Added viewKey instance
-    @State var showWelcomeScreen: Bool = !UserDefaults.standard.bool(forKey: "hasSeenWelcomeScreen") // Check if the welcome screen has been shown
+    @State var showWelcomeScreen: Bool = !UserDefaults.standard.bool(forKey: "permissionsRequested") // Check if permissions were requested before
 
     var body: some View {
         NavigationStack {
             GeometryReader { geometry in
-                VStack {
-                    if isLoading {
+                ZStack {
+                    if showWelcomeScreen {
+                        WelcomeScreen(showWelcomeScreen: $showWelcomeScreen)
+                            .onDisappear {
+                                requestPermissions()
+                            }
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .background(settingsManager.isDarkMode ? Color.black : Color.white)
+                            .edgesIgnoringSafeArea(.all)
+                    } else if isLoading {
                         ProgressView("Requesting Permissions...")
                             .padding()
-                            .onAppear {
-                                print("ContentView appeared - requesting permissions")
-                                services.speechService.requestAllPermissions { granted in
-                                    DispatchQueue.main.async {
-                                        print("Permissions granted: \(granted)")
-                                        if granted {
-                                            isLoading = false
-                                        } else {
-                                            print("Permissions were not granted.")
-                                        }
-                                    }
-                                }
-                            }
+                            .background(settingsManager.isDarkMode ? Color.black : Color.white)
+                            .foregroundColor(settingsManager.isDarkMode ? Color.white : Color.black)
+                            .cornerRadius(10)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         VStack {
-                            TranscriptionView(settingsManager: settingsManager)
+                            TranscriptionView(settingsManager: settingsManager, speechService: services.speechService, notificationService: services.notificationService)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .background(settingsManager.isDarkMode ? Color.black : Color.white)
                                 .cornerRadius(16)
@@ -37,31 +36,31 @@ struct ContentView: View {
                                 .onAppear {
                                     updateColorScheme()
                                 }
+
+                            Spacer()
+
+                            NavigationLink(destination: SettingsView(settingsManager: settingsManager)) {
+                                Image(systemName: "gear")
+                                    .resizable()
+                                    .frame(width: 30, height: 30)
+                                    .padding()
+                                    .foregroundColor(settingsManager.isDarkMode ? Color.white : Color.black)
+                            }
+                            .padding(.bottom, 20)
                         }
-                        .frame(maxWidth: geometry.size.width * 0.9, maxHeight: geometry.size.height * 0.8)
+                        .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height)
                         .background(settingsManager.isDarkMode ? Color.black : Color.white)
                         .onAppear {
                             updateColorScheme()
                         }
-                    }
-                    NavigationLink(destination: SettingsView(settingsManager: settingsManager)) {
-                        Image(systemName: "gear")
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                            .padding()
+                        .edgesIgnoringSafeArea(.all)
                     }
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .background(settingsManager.isDarkMode ? Color.black : Color.white)
-                .onAppear {
-                    updateColorScheme()
-                }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
-        .fullScreenCover(isPresented: $showWelcomeScreen) {
-            WelcomeScreen(showWelcomeScreen: $showWelcomeScreen)
-        }
     }
 
     private func updateColorScheme() {
@@ -81,13 +80,31 @@ struct ContentView: View {
         }
     }
 
+    private func requestPermissions() {
+        isLoading = true
+        services.speechService.requestAllPermissions { granted in
+            DispatchQueue.main.async {
+                print("Permissions granted: \(granted)")
+                if granted {
+                    isLoading = false
+                    UserDefaults.standard.set(true, forKey: "permissionsRequested") // Save that permissions were requested
+                } else {
+                    print("Permissions were not granted.")
+                    isLoading = false
+                }
+            }
+        }
+    }
+
     private func startSpeechService() {
         print("Starting speech service transcription")
         services.speechService.startTranscription { result, error in
             if let error = error {
                 print("Error starting transcription: \(error.localizedDescription)")
+                isLoading = false
             } else if let result = result {
                 print("Transcription result: \(result)")
+                isLoading = false
             }
         }
     }

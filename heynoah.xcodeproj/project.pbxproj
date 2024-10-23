@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0DF198DF2CC9774C000BDB7C /* consolidate-swift.sh in Resources */ = {isa = PBXBuildFile; fileRef = 0DF198DE2CC97735000BDB7C /* consolidate-swift.sh */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		0F8674AF2CBC26F200BAC0BF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0DF198DE2CC97735000BDB7C /* consolidate-swift.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "consolidate-swift.sh"; sourceTree = "<group>"; };
 		0F86749E2CBC26F100BAC0BF /* heynoah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = heynoah.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F8674AE2CBC26F200BAC0BF /* heynoahTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = heynoahTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F8674B82CBC26F200BAC0BF /* heynoahUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = heynoahUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -88,6 +93,7 @@
 		0F8674952CBC26F100BAC0BF = {
 			isa = PBXGroup;
 			children = (
+				0DF198DE2CC97735000BDB7C /* consolidate-swift.sh */,
 				0F8674A02CBC26F100BAC0BF /* heynoah */,
 				0F8674B12CBC26F200BAC0BF /* heynoahTests */,
 				0F8674BB2CBC26F200BAC0BF /* heynoahUITests */,
@@ -225,6 +231,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0DF198DF2CC9774C000BDB7C /* consolidate-swift.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

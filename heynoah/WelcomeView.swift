@@ -19,6 +19,7 @@ struct WelcomeScreen: View {
                     .fontWeight(.bold)
                     .padding(.top)
                     .multilineTextAlignment(textAlignment())
+                    .foregroundColor(.black) // Updated for better readability in light mode
             }
             .padding(.horizontal)
             .padding(.top, 40) // Additional padding to handle iPhone notch
@@ -28,17 +29,22 @@ struct WelcomeScreen: View {
                 .font(.system(size: fontSize(for: .body)))
                 .multilineTextAlignment(textAlignment())
                 .padding(.horizontal)
+                .foregroundColor(.black) // Updated for better readability in light mode
 
             // Introduction Bullet Points
             VStack(alignment: textAlignment() == .center ? .center : .leading, spacing: 10) {
                 Text("🛡️ Privacy-conscious live transcription app.")
                     .font(.system(size: fontSize(for: .body)))
+                    .foregroundColor(.black) // Updated for better readability in light mode
                 Text("💬 Great for reading what people in the room are saying in real time.")
                     .font(.system(size: fontSize(for: .body)))
+                    .foregroundColor(.black) // Updated for better readability in light mode
                 Text("⚙️ Customizable features: font size, dark mode, and kid mode.")
                     .font(.system(size: fontSize(for: .body)))
+                    .foregroundColor(.black) // Updated for better readability in light mode
                 Text("🔔 Notifications when your chosen name is heard (default: Noah).")
                     .font(.system(size: fontSize(for: .body)))
+                    .foregroundColor(.black) // Updated for better readability in light mode
             }
             .padding(.horizontal)
 
@@ -47,6 +53,7 @@ struct WelcomeScreen: View {
                 .font(.system(size: fontSize(for: .body)))
                 .multilineTextAlignment(textAlignment())
                 .padding(.horizontal)
+                .foregroundColor(.black) // Updated for better readability in light mode
 
             Spacer()
 
@@ -59,18 +66,22 @@ struct WelcomeScreen: View {
                     .padding(.horizontal)
                     .padding(.vertical, 10)
                     .fixedSize(horizontal: false, vertical: true) // Ensure the note wraps and is always visible
+                    .foregroundColor(.black) // Updated for better readability in light mode
 
                 HStack {
                     Button(action: {
                         isCheckboxChecked.toggle()
                     }) {
                         Image(systemName: isCheckboxChecked ? "checkmark.square.fill" : "square")
-                            .font(.system(size: 64))
+                            .font(.system(size: UIDevice.current.userInterfaceIdiom == .pad ? 96 : 64))
+                            .foregroundColor(.black)
+                            .font(.system(size: UIDevice.current.userInterfaceIdiom == .pad ? 96 : 64))
                     }
                     .buttonStyle(PlainButtonStyle())
                     
                     Text("Got it 👍")
-                        .font(.system(size: 64))
+                        .font(.system(size: UIDevice.current.userInterfaceIdiom == .pad ? 96 : 64))
+                        .foregroundColor(.black) // Updated for better readability in light mode
                 }
                 .padding(.horizontal)
             }
@@ -92,7 +103,7 @@ struct WelcomeScreen: View {
             .disabled(!isCheckboxChecked)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.gray.opacity(0.3))
+        .background(Color.white) // Updated to white background for light mode
         .edgesIgnoringSafeArea(.all) // Ensures the view takes up the full screen
     }
 

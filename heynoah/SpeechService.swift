@@ -1,9 +1,12 @@
-
 // SpeechService.swift
 import Foundation
 import Speech
 import AVFoundation
-import UIKit // Added to access UIApplication
+import UIKit
+
+protocol SpeechServiceDelegate: AnyObject {
+    func permissionsGranted()
+}
 
 class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
     static let transcriptionStatusNotification = Notification.Name("TranscriptionStatusChanged")
@@ -15,15 +18,26 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
     private var isTranscribing: Bool = false
     private var retryCount = 0
     private let maxRetryCount = 3
+    var permissionsGranted: Bool = false
+    private var permissionsRequested: Bool = false
+    weak var delegate: SpeechServiceDelegate?
+    
+    @Published var transcriptionText: String = "" // Add this property to hold transcription text
 
     override init() {
         super.init()
         setupNotifications()
+        checkPermissionsStatus() // Check permissions status on initialization
     }
 
     private func setupNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillResignActive), name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleAppDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
+    }
+
+    private func checkPermissionsStatus() {
+        // Check UserDefaults to see if permissions were requested before
+        permissionsGranted = UserDefaults.standard.bool(forKey: "permissionsRequested")
     }
 
     @objc private func handleAppWillResignActive() {
@@ -38,13 +52,23 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
 
     @objc private func handleAppDidBecomeActive() {
         print("App did become active - ensuring transcription continues")
-        if !audioEngine.isRunning {
+        if permissionsGranted && !audioEngine.isRunning {
             startTranscription { _, _ in }
         }
     }
 
     func requestAllPermissions(completion: @escaping (Bool) -> Void) {
+        guard !permissionsRequested else {
+            print("Permissions already requested")
+            completion(permissionsGranted)
+            if permissionsGranted {
+                delegate?.permissionsGranted()
+            }
+            return
+        }
+
         print("Requesting all permissions")
+        permissionsRequested = true
         let dispatchGroup = DispatchGroup()
         var allGranted = true
 
@@ -69,9 +93,13 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
         dispatchGroup.notify(queue: .main) {
             if (allGranted) {
                 print("All permissions granted")
+                self.permissionsGranted = true
+                UserDefaults.standard.set(true, forKey: "permissionsRequested") // Save permissions state
+                self.delegate?.permissionsGranted()
                 completion(true)
             } else {
                 print("One or more permissions not granted")
+                self.permissionsGranted = false
                 completion(false)
             }
         }
@@ -79,7 +107,7 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
 
     func requestMicrophoneAccess(completion: @escaping (Bool) -> Void) {
         print("Requesting microphone access")
-        AVAudioApplication.requestRecordPermission{ granted in
+        AVAudioApplication.requestRecordPermission { granted in
             DispatchQueue.main.async {
                 print("Microphone access result: \(granted)")
                 completion(granted)
@@ -104,16 +132,18 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
     }
 
     func startTranscription(completion: @escaping (String?, Error?) -> Void) {
-        // Notify that initialization is starting
-        NotificationCenter.default.post(name: SpeechService.transcriptionStatusNotification, object: nil, userInfo: ["status": "Initializing..."])
-        // Set initializing text before starting transcription
-        DispatchQueue.main.async {
-            print("Initializing...")
+        guard permissionsGranted else {
+            print("Permissions not granted - cannot start transcription")
+            completion(nil, NSError(domain: "SpeechService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Permissions not granted"]))
+            return
         }
-        guard !isTranscribing else {
+
+        // Ensure only one recognition task runs at a time
+        if isTranscribing || recognitionTask != nil {
             print("Transcription already in progress - skipping start")
             return
-        } // Avoid starting transcription if already in progress
+        }
+        
         isTranscribing = true
 
         // Stop the audio engine if it is running
@@ -122,9 +152,15 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
             stopAudioEngineSafely()
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { // Increased delay to ensure proper cleanup
-            print("Configuring and starting audio engine for transcription")
-            self.configureAndStartAudioEngine(completion: completion)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            if self.permissionsGranted {
+                print("Configuring and starting audio engine for transcription")
+                self.configureAndStartAudioEngine(completion: completion)
+            } else {
+                print("Permissions not granted - cannot configure audio engine")
+                completion(nil, NSError(domain: "SpeechService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Permissions not granted"]))
+                self.isTranscribing = false
+            }
         }
     }
 
@@ -159,7 +195,7 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
         inputNode.removeTap(onBus: 0)
 
         recognitionTask = speechRecognizer.recognitionTask(with: request) { result, error in
-            if let error = error as NSError?, error.domain == SFSpeechErrorDomain, error.code == 1101 {
+            if let nsError = error as NSError?, nsError.domain == SFSpeechErrorDomain, nsError.code == 1101 {
                 print("No speech detected, continuing without restarting.")
                 return
             }
@@ -170,6 +206,7 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
                 return
             }
             if let result = result {
+                self.transcriptionText = result.bestTranscription.formattedString // Update transcriptionText property
                 completion(result.bestTranscription.formattedString, nil)
                 // Automatically continue without restarting on final result
             }
