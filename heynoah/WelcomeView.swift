@@ -112,12 +112,12 @@ struct WelcomeScreen: View {
                     .cornerRadius(8)
             }
             .padding(.horizontal)
-            .padding(.bottom, 40)
+            .padding(.bottom, 60) // Increase bottom padding to avoid home gesture interference
             .disabled(!isCheckboxChecked)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white) // Updated to white background for light mode
-        .edgesIgnoringSafeArea(.all) // Ensures the view takes up the full screen
+        .padding(.bottom, 30) // Add some extra padding at the bottom of the entire VStack
     }
 
     private func fontSize(for style: FontStyle) -> CGFloat {
