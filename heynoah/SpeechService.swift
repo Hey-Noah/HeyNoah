@@ -130,7 +130,6 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
             }
         }
     }
-
     func startTranscription(completion: @escaping (String?, Error?) -> Void) {
         guard permissionsGranted else {
             print("Permissions not granted - cannot start transcription")
@@ -138,12 +137,15 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
             return
         }
 
+        // Set initial transcription text
+        transcriptionText = "Initializing..."
+        
         // Ensure only one recognition task runs at a time
         if isTranscribing || recognitionTask != nil {
             print("Transcription already in progress - skipping start")
             return
         }
-        
+
         isTranscribing = true
 
         // Stop the audio engine if it is running
