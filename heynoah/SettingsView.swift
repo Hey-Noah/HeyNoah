@@ -9,42 +9,44 @@ struct SettingsView: View {
             ZStack {
                 (settingsManager.isDarkMode ? Color.black : Color.white)
                     .edgesIgnoringSafeArea(.all)
-                VStack {
-                    Text("Font Size")
-                        .font(.system(size: settingsManager.fontSize))
-                        .foregroundColor(settingsManager.isDarkMode ? .white : .black)
-                        .padding(.bottom, 4)
-                    Slider(value: $settingsManager.fontSize, in: 32...(UIDevice.current.userInterfaceIdiom == .phone ? 128 : 256), step: 2)
-                        .padding()
-                    HStack {
-                        Toggle(isOn: $settingsManager.isDarkMode) {
-                            Text("Dark Mode")
-                                .foregroundColor(settingsManager.isDarkMode ? .white : .black)
+                ScrollView {
+                    VStack {
+                        Text("Font Size")
+                            .font(.system(size: settingsManager.fontSize))
+                            .foregroundColor(settingsManager.isDarkMode ? .white : .black)
+                            .padding(.bottom, 4)
+                        Slider(value: $settingsManager.fontSize, in: 32...(UIDevice.current.userInterfaceIdiom == .phone ? 128 : 256), step: 2)
+                            .padding()
+                        HStack {
+                            Toggle(isOn: $settingsManager.isDarkMode) {
+                                Text("Dark Mode")
+                                    .foregroundColor(settingsManager.isDarkMode ? .white : .black)
+                            }
+                            .padding()
+                            Spacer()
                         }
-                        .padding()
-                        Spacer()
-                    }
-                    HStack {
-                        Toggle(isOn: $settingsManager.isKidModeEnabled) {
-                            Text("Kid Mode 🌈🪁")
-                                .foregroundColor(settingsManager.isDarkMode ? .white : .black)
+                        HStack {
+                            Toggle(isOn: $settingsManager.isKidModeEnabled) {
+                                Text("Kid Mode 🌈🏁")
+                                    .foregroundColor(settingsManager.isDarkMode ? .white : .black)
+                            }
+                            .padding()
+                            Spacer()
                         }
-                        .padding()
-                        Spacer()
+                        TextField("Enter Custom Name", text: $settingsManager.customName)
+                            .padding()
+                            .background(settingsManager.isDarkMode ? Color.gray.opacity(0.2) : Color.white)
+                            .cornerRadius(8)
+                            .foregroundColor(settingsManager.isDarkMode ? .white : .black)
+                            .frame(maxWidth: geometry.size.width * 0.9)
                     }
-                    TextField("Enter Custom Name", text: $settingsManager.customName)
-                        .padding()
-                        .background(settingsManager.isDarkMode ? Color.gray.opacity(0.2) : Color.white)
-                        .cornerRadius(8)
-                        .foregroundColor(settingsManager.isDarkMode ? .white : .black)
-                        .frame(maxWidth: geometry.size.width * 0.9)
-                }
-                .padding()
-                .frame(maxWidth: geometry.size.width * 0.9, maxHeight: geometry.size.height * 0.8)
-                .background(settingsManager.isDarkMode ? Color.black : Color.white)
-                .cornerRadius(16)
-                .onAppear {
-                    updateColorScheme()
+                    .padding()
+                    .frame(maxWidth: geometry.size.width * 0.9)
+                    .background(settingsManager.isDarkMode ? Color.black.opacity(0.8) : Color.white.opacity(0.8))
+                    .cornerRadius(16)
+                    .onAppear {
+                        updateColorScheme()
+                    }
                 }
             }
         }

@@ -35,15 +35,21 @@ struct WelcomeScreen: View {
 
             // Introduction Bullet Points
             VStack(alignment: textAlignment() == .center ? .center : .leading, spacing: 10) {
-                Text("🛡️ Privacy-conscious live transcription app.")
+                Text("🛡️ This is an privacy-first free & open-source live transcription app I built for my dad, Noah.")
                     .font(.system(size: fontSize(for: .body)))
                     .foregroundColor(.black)
                     .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
-                Text("💬 Great for reading what people in the room are saying in real time.")
+                    .underline(true, color: .blue)
+                    .onTapGesture {
+                        if let url = URL(string: "https://github.com/Hey-Noah/HeyNoah") {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                Text("💬 Great for reading what people in the room are saying in real time even if you are offline!")
                     .font(.system(size: fontSize(for: .body)))
                     .foregroundColor(.black)
                     .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
-                Text("⚙️ Customizable features: font size, dark mode, and kid mode.")
+                Text("⚙️ Customizable features: font size, dark mode, and kid mode for when 💩 happens.")
                     .font(.system(size: fontSize(for: .body)))
                     .foregroundColor(.black)
                     .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
