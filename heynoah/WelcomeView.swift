@@ -20,6 +20,7 @@ struct WelcomeScreen: View {
                     .padding(.top)
                     .multilineTextAlignment(textAlignment())
                     .foregroundColor(.black) // Updated for better readability in light mode
+                    .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
             }
             .padding(.horizontal)
             .padding(.top, 40) // Additional padding to handle iPhone notch
@@ -30,30 +31,36 @@ struct WelcomeScreen: View {
                 .multilineTextAlignment(textAlignment())
                 .padding(.horizontal)
                 .foregroundColor(.black) // Updated for better readability in light mode
+                .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
 
             // Introduction Bullet Points
             VStack(alignment: textAlignment() == .center ? .center : .leading, spacing: 10) {
                 Text("🛡️ Privacy-conscious live transcription app.")
                     .font(.system(size: fontSize(for: .body)))
-                    .foregroundColor(.black) // Updated for better readability in light mode
+                    .foregroundColor(.black)
+                    .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
                 Text("💬 Great for reading what people in the room are saying in real time.")
                     .font(.system(size: fontSize(for: .body)))
-                    .foregroundColor(.black) // Updated for better readability in light mode
+                    .foregroundColor(.black)
+                    .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
                 Text("⚙️ Customizable features: font size, dark mode, and kid mode.")
                     .font(.system(size: fontSize(for: .body)))
-                    .foregroundColor(.black) // Updated for better readability in light mode
+                    .foregroundColor(.black)
+                    .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
                 Text("🔔 Notifications when your chosen name is heard (default: Noah).")
                     .font(.system(size: fontSize(for: .body)))
-                    .foregroundColor(.black) // Updated for better readability in light mode
+                    .foregroundColor(.black)
+                    .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
             }
             .padding(.horizontal)
 
             // Playful Suggestion About Customization
-            Text("Not named Noah? No worries! You can change it by tapping the \(Image(systemName: "gear")) icon.")
+            Text("Not named Noah? No worries! You can change it by tapping the settings icon.")
                 .font(.system(size: fontSize(for: .body)))
                 .multilineTextAlignment(textAlignment())
                 .padding(.horizontal)
                 .foregroundColor(.black) // Updated for better readability in light mode
+                .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
 
             Spacer()
 
@@ -75,13 +82,13 @@ struct WelcomeScreen: View {
                         Image(systemName: isCheckboxChecked ? "checkmark.square.fill" : "square")
                             .font(.system(size: UIDevice.current.userInterfaceIdiom == .pad ? 96 : 64))
                             .foregroundColor(.black)
-                            .font(.system(size: UIDevice.current.userInterfaceIdiom == .pad ? 96 : 64))
                     }
                     .buttonStyle(PlainButtonStyle())
                     
                     Text("Got it 👍")
                         .font(.system(size: UIDevice.current.userInterfaceIdiom == .pad ? 96 : 64))
                         .foregroundColor(.black) // Updated for better readability in light mode
+                        .fixedSize(horizontal: false, vertical: true) // Ensure text wraps correctly
                 }
                 .padding(.horizontal)
             }
