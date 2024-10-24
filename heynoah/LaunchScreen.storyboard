@@ -20,7 +20,7 @@
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="Bcu-3y-fUS" firstAttribute="trailing" secondItem="yoX-eX-19A" secondAttribute="trailing" id="2mW-UZ-kPQ"/>
                             <constraint firstItem="yoX-eX-19A" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="evc-MT-Eon"/>
