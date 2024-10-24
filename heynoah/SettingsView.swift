@@ -1,4 +1,3 @@
-
 // SettingsView.swift
 import SwiftUI
 
@@ -35,12 +34,22 @@ struct SettingsView: View {
                             .padding()
                             Spacer()
                         }
-                        TextField("Enter Custom Name", text: $settingsManager.customName)
-                            .padding()
-                            .background(settingsManager.isDarkMode ? Color.gray.opacity(0.2) : Color.white)
-                            .cornerRadius(8)
-                            .foregroundColor(settingsManager.isDarkMode ? .white : .black)
-                            .frame(maxWidth: geometry.size.width * 0.9)
+                        HStack(alignment: .center) {
+                            Text("Custom Name:")
+                                .foregroundColor(settingsManager.isDarkMode ? .white : .black)
+                            TextField("Your name?", text: $settingsManager.customName)
+                                .font(.system(size: 24))
+                                .padding()
+                                .background(settingsManager.isDarkMode ? Color.gray.opacity(0.2) : Color.white)
+                                .cornerRadius(8)
+                                .foregroundColor(settingsManager.isDarkMode ? .white : .black)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(settingsManager.isDarkMode ? Color.white.opacity(0.9) : Color.black.opacity(0.9), lineWidth: 2)
+                                )
+                        }
+                        .padding()
+                        .frame(maxWidth: geometry.size.width * 0.9)
                     }
                     .padding()
                     .frame(maxWidth: geometry.size.width * 0.9)
