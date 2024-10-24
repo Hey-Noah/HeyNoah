@@ -1,4 +1,3 @@
-
 // AppDelegate.swift
 import UIKit
 import UserNotifications
@@ -7,6 +6,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         print("App launched")
         UNUserNotificationCenter.current().delegate = self
+        UIApplication.shared.isIdleTimerDisabled = true // Prevent app from going to sleep
         return true
     }
 
