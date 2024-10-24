@@ -50,6 +50,11 @@ struct SettingsView: View {
                         }
                         .padding()
                         .frame(maxWidth: geometry.size.width * 0.9)
+                        Spacer()
+                        Text("Made with <3 in Silver Spring, MD")
+                            .font(.footnote)
+                            .foregroundColor(settingsManager.isDarkMode ? Color.white.opacity(0.3) : Color.black.opacity(0.3))
+                            .padding(.top, 20)
                     }
                     .padding()
                     .frame(maxWidth: geometry.size.width * 0.9)
