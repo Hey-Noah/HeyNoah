@@ -12,16 +12,40 @@ class SharedServices: ObservableObject {
     @Published var settingsManager = SettingsManager() // Added settingsManager to SharedServices
 }
 
+// SettingsManager.swift
+import Foundation
+import Combine
+
 class SettingsManager: ObservableObject {
-    @Published var isDarkMode: Bool = false
-    @Published var isKidModeEnabled: Bool = false
-    @Published var fontSize: CGFloat = 64
-    @Published var customName: String = "Noah"
+    @Published var isDarkMode: Bool {
+        didSet {
+            UserDefaults.standard.set(isDarkMode, forKey: "isDarkMode")
+        }
+    }
+    @Published var isKidModeEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(isKidModeEnabled, forKey: "isKidModeEnabled")
+        }
+    }
+    @Published var fontSize: CGFloat {
+        didSet {
+            UserDefaults.standard.set(fontSize, forKey: "fontSize")
+        }
+    }
+    @Published var customName: String {
+        didSet {
+            UserDefaults.standard.set(customName, forKey: "customName")
+        }
+    }
     
     // Load kidUnfriendlyWords from JSON file
     private(set) var kidUnfriendlyWords: [String: String] = [:]
     
     init() {
+        self.isDarkMode = UserDefaults.standard.bool(forKey: "isDarkMode")
+        self.isKidModeEnabled = UserDefaults.standard.bool(forKey: "isKidModeEnabled")
+        self.fontSize = UserDefaults.standard.object(forKey: "fontSize") as? CGFloat ?? 64
+        self.customName = UserDefaults.standard.string(forKey: "customName") ?? "Noah"
         loadKidUnfriendlyWords()
     }
     
@@ -39,6 +63,7 @@ class SettingsManager: ObservableObject {
         }
     }
 }
+
 
 class NotificationService: ObservableObject {
     private let notificationCenter = UNUserNotificationCenter.current()
