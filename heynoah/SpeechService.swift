@@ -165,77 +165,50 @@ class SpeechService: NSObject, SFSpeechRecognizerDelegate, ObservableObject {
             }
         }
     }
-
     private func configureAndStartAudioEngine(completion: @escaping (String?, Error?) -> Void) {
-        guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
-            print("Speech recognizer not available")
-            completion(nil, NSError(domain: "SpeechService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Speech recognizer not available"]))
-            isTranscribing = false
-            return
-        }
-
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            print("Configuring audio session")
-            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.mixWithOthers, .allowBluetooth, .allowBluetoothA2DP])
-            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
-            print("Audio session configured successfully")
-        } catch {
-            print("Failed to configure audio session: \(error.localizedDescription)")
-            completion(nil, error)
-            handleSpeechServiceError(error: error)
-            isTranscribing = false
-            return
-        }
-
-        request = SFSpeechAudioBufferRecognitionRequest()
-        request.shouldReportPartialResults = true
-        request.requiresOnDeviceRecognition = true
-        let inputNode = audioEngine.inputNode
-
-        // Remove any existing tap before adding a new one
-        inputNode.removeTap(onBus: 0)
-
-        recognitionTask = speechRecognizer.recognitionTask(with: request) { result, error in
-            if let nsError = error as NSError?, nsError.domain == SFSpeechErrorDomain, nsError.code == 1101 {
-                print("No speech detected, continuing without restarting.")
+            guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
+                completion(nil, NSError(domain: "SpeechService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Speech recognizer not available"]))
+                isTranscribing = false
                 return
             }
 
-            if let error = error {
-                print("Recognition task error: \(error.localizedDescription)")
-                self.handleSpeechServiceError(error: error)
-                return
-            }
-            if let result = result {
-                self.transcriptionText = result.bestTranscription.formattedString // Update transcriptionText property
-                completion(result.bestTranscription.formattedString, nil)
-                // Automatically continue without restarting on final result
-            }
-        }
+            do {
+                try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .measurement, options: [.mixWithOthers, .allowBluetooth, .allowBluetoothA2DP])
+                try AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
 
-        let recordingFormat = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
-            self.request.append(buffer)
-        }
+                request = SFSpeechAudioBufferRecognitionRequest()
+                request.shouldReportPartialResults = true
 
-        do {
-            print("Preparing and starting audio engine")
-            audioEngine.prepare()
-            try audioEngine.start()
-            print("Audio engine started successfully")
-            // Notify that transcription is now listening
-            NotificationCenter.default.post(name: SpeechService.transcriptionStatusNotification, object: nil, userInfo: ["status": "Listening..."])
-            DispatchQueue.main.async {
-                print("Listening...")
+                let inputNode = audioEngine.inputNode
+                inputNode.removeTap(onBus: 0) // Remove any existing tap
+                recognitionTask = speechRecognizer.recognitionTask(with: request) { result, error in
+                    if let result = result {
+                        completion(result.bestTranscription.formattedString, nil)
+                        self.transcriptionText = result.bestTranscription.formattedString // Update transcription text
+                    }
+                    if let error = error {
+                        completion(nil, error)
+                    }
+                }
+
+                let recordingFormat = inputNode.outputFormat(forBus: 0)
+                inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+                    self.request.append(buffer)
+                }
+
+                audioEngine.prepare()
+                try audioEngine.start()
+
+                // Notify that transcription is now listening
+                DispatchQueue.main.async {
+                    self.transcriptionText = "Listening..."
+                }
+
+            } catch {
+                completion(nil, error)
+                isTranscribing = false
             }
-        } catch {
-            print("Failed to start audio engine: \(error.localizedDescription)")
-            completion(nil, error)
-            handleSpeechServiceError(error: error)
-            isTranscribing = false
         }
-    }
 
     func stopAudioEngineSafely() {
         if audioEngine.isRunning {
