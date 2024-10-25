@@ -122,16 +122,20 @@ struct ContentView: View {
         }
     }
 
-    func startMicrophoneColorToggle() {
-        if settingsManager.timer != nil {
-            return
-        }
-        settingsManager.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            DispatchQueue.main.async {
+func startMicrophoneColorToggle() {
+    if settingsManager.timer != nil {
+        return
+    }
+    settingsManager.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+        DispatchQueue.main.async {
+            if settingsManager.isDarkMode {
+                settingsManager.microphoneColor = (settingsManager.microphoneColor == .red) ? .black : .red
+            } else {
                 settingsManager.microphoneColor = (settingsManager.microphoneColor == .red) ? .white : .red
             }
         }
     }
+}
 
     func stopMicrophoneColorToggle() {
         DispatchQueue.main.async {
