@@ -18,6 +18,7 @@ struct SettingsView: View {
                                 .resizable()
                                 .frame(width: 20, height: 30)
                                 .foregroundColor(settingsManager.microphoneColor)
+                                .animation(.easeInOut(duration: 1.0), value: settingsManager.microphoneColor)
                                 .padding()
                             Spacer()
                         }
