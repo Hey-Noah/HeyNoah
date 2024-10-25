@@ -39,13 +39,25 @@ struct ContentView: View {
                                 }
 
                             Spacer()
+                            HStack {
+                                Spacer()
+                                Image(systemName: "mic.fill")
+                                    .resizable()
+                                    .frame(width: 20, height: 30)
+                                    .foregroundColor(settingsManager.microphoneColor)
+                                    .padding()
+                                    .onAppear {
+                                        startListeningForAudioEngine()
+                                    }
 
+                                Spacer()
+                            }
                             HStack {
                                    Spacer()
                                    NavigationLink(destination: SettingsView(settingsManager: settingsManager)) {
                                        Image(systemName: "gear")
                                            .resizable()
-                                           .frame(width: 30, height: 30) // Original size for consistency
+                                        .frame(width: 30, height: 30)
                                            .padding()
                                            .foregroundColor(settingsManager.isDarkMode ? Color.white : Color.black)
                                    }
@@ -72,6 +84,20 @@ struct ContentView: View {
         }
     }
 
+    func startListeningForAudioEngine() {
+        NotificationCenter.default.addObserver(forName: SpeechService.engineStartedNotification, object: nil, queue: .main) { _ in
+            DispatchQueue.main.async {
+                startMicrophoneColorToggle()
+            }
+        }
+        NotificationCenter.default.addObserver(forName: SpeechService.engineStoppedNotification, object: nil, queue: .main) { _ in
+            DispatchQueue.main.async {
+                stopMicrophoneColorToggle()
+            }
+        }
+    }
+
+
     private func updateColorScheme() {
         #if os(iOS)
         let newColorScheme: UIUserInterfaceStyle = settingsManager.isDarkMode ? .dark : .light
@@ -92,6 +118,25 @@ struct ContentView: View {
                     isLoading = false
                 }
             }
+        }
+    }
+
+    func startMicrophoneColorToggle() {
+        if settingsManager.timer != nil {
+            return
+        }
+        settingsManager.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            DispatchQueue.main.async {
+                settingsManager.microphoneColor = (settingsManager.microphoneColor == .red) ? .white : .red
+            }
+        }
+    }
+
+    func stopMicrophoneColorToggle() {
+        DispatchQueue.main.async {
+            settingsManager.timer?.invalidate()
+            settingsManager.timer = nil
+            settingsManager.microphoneColor = .gray // Reset to default color
         }
     }
 }

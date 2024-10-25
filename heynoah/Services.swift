@@ -5,6 +5,7 @@ import Speech
 import AVFoundation
 import AVFAudio
 import Combine
+import SwiftUI
 
 class SharedServices: ObservableObject {
     @Published var speechService = SpeechService()
@@ -17,6 +18,8 @@ import Foundation
 import Combine
 
 class SettingsManager: ObservableObject {
+    @Published var microphoneColor: Color = .gray
+    @Published var timer: Timer?
     @Published var isDarkMode: Bool {
         didSet {
             UserDefaults.standard.set(isDarkMode, forKey: "isDarkMode")
@@ -37,6 +40,9 @@ class SettingsManager: ObservableObject {
             UserDefaults.standard.set(customName, forKey: "customName")
         }
     }
+
+
+
     
     // Load kidUnfriendlyWords from JSON file
     private(set) var kidUnfriendlyWords: [String: String] = [:]

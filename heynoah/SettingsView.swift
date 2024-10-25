@@ -12,6 +12,15 @@ struct SettingsView: View {
                     .edgesIgnoringSafeArea(.all)
                 ScrollView {
                     VStack {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "mic.fill")
+                                .resizable()
+                                .frame(width: 20, height: 30)
+                                .foregroundColor(settingsManager.microphoneColor)
+                                .padding()
+                            Spacer()
+                        }
                         Text("Font Size")
                             .font(.system(size: settingsManager.fontSize))
                             .foregroundColor(settingsManager.isDarkMode ? .white : .black)
@@ -55,6 +64,7 @@ struct SettingsView: View {
                             .font(.footnote)
                             .foregroundColor(settingsManager.isDarkMode ? Color.white.opacity(0.3) : Color.black.opacity(0.3))
                             .padding(.top, 20)
+                       
                     }
                     .padding()
                     .frame(maxWidth: geometry.size.width * 0.9)
