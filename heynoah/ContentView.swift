@@ -1,3 +1,4 @@
+// ContentView.swift
 import SwiftUI
 
 struct ContentView: View {
@@ -37,50 +38,43 @@ struct ContentView: View {
                                 .onAppear {
                                     updateColorScheme()
                                 }
-
                             Spacer()
-                            HStack {
-                                Spacer()
-                                Image(systemName: "mic.fill")
-                                    .resizable()
-                                    .frame(width: 20, height: 30)
-                                    .foregroundColor(settingsManager.microphoneColor)
-                                    .animation(.easeInOut(duration: 1.0), value: settingsManager.microphoneColor)
-                                    .padding()
-                                    .onAppear {
-                                        startListeningForAudioEngine()
-                                    }
-
-                                Spacer()
-                            }
-                            HStack {
-                                   Spacer()
-                                   NavigationLink(destination: SettingsView(settingsManager: settingsManager)) {
-                                       Image(systemName: "gear")
-                                           .resizable()
-                                        .frame(width: 30, height: 30)
-                                           .padding()
-                                           .foregroundColor(settingsManager.isDarkMode ? Color.white : Color.black)
-                                   }
-                                   Spacer()
-                               }
-                               .padding(.bottom, 40) // Add padding at the bottom to avoid the home swipe area
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(settingsManager.isDarkMode ? Color.black : Color.white)
-                        .onAppear {
-                            updateColorScheme()
-                        }
                         .edgesIgnoringSafeArea(.all)
                     }
                 }
                 .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height)
                 .background(settingsManager.isDarkMode ? Color.black : Color.white)
+                .overlay(alignment: .bottom) {
+                    HStack {
+                        NavigationLink(destination: SettingsView(settingsManager: settingsManager)) {
+                            Image(systemName: "gear")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(settingsManager.isDarkMode ? .white : .black)
+                        }
+                        Spacer()
+                        Image(systemName: "mic.fill")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 30)
+                            .foregroundColor(settingsManager.microphoneColor)
+                            .animation(.easeInOut(duration: 1.0), value: settingsManager.microphoneColor)
+                            .onAppear {
+                                startListeningForAudioEngine()
+                            }
+                    }
+                    .padding()
+                    .background(settingsManager.isDarkMode ? Color.black.opacity(0.8) : Color.white.opacity(0.8))
+                    .ignoresSafeArea(edges: .bottom)
+                }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
-            // Update color scheme on startup for multiplatform support
             updateColorScheme()
         }
     }
@@ -97,7 +91,6 @@ struct ContentView: View {
             }
         }
     }
-
 
     private func updateColorScheme() {
         #if os(iOS)
@@ -122,26 +115,24 @@ struct ContentView: View {
         }
     }
 
-func startMicrophoneColorToggle() {
-    if settingsManager.timer != nil {
-        return
-    }
-    settingsManager.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-        DispatchQueue.main.async {
-            if settingsManager.isDarkMode {
-                settingsManager.microphoneColor = (settingsManager.microphoneColor == .red) ? .black : .red
-            } else {
-                settingsManager.microphoneColor = (settingsManager.microphoneColor == .red) ? .white : .red
+    func startMicrophoneColorToggle() {
+        if settingsManager.timer != nil { return }
+        settingsManager.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            DispatchQueue.main.async {
+                if settingsManager.isDarkMode {
+                    settingsManager.microphoneColor = (settingsManager.microphoneColor == .red) ? .black : .red
+                } else {
+                    settingsManager.microphoneColor = (settingsManager.microphoneColor == .red) ? .white : .red
+                }
             }
         }
     }
-}
 
     func stopMicrophoneColorToggle() {
         DispatchQueue.main.async {
             settingsManager.timer?.invalidate()
             settingsManager.timer = nil
-            settingsManager.microphoneColor = .gray // Reset to default color
+            settingsManager.microphoneColor = .gray
         }
     }
 }
